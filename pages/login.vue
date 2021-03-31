@@ -33,7 +33,7 @@ export default {
       var provider = new this.$fireModule.auth.GoogleAuthProvider();
       let authData = await this.$fire.auth.signInWithPopup(provider);
       createProfile(authData);
-      this.$router.push('/blog/me')
+      this.$router.push('/profile')
     }
   }
 }
