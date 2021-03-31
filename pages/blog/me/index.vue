@@ -2,7 +2,7 @@
   <div class="text-center">
     <v-card>
       <v-card-text>
-        <p>Your e-mail is {{ authUser.email }}</p>
+        <p>{{ user.name }}</p>
         <v-btn @click="logout">Logout</v-btn>
       </v-card-text>
     </v-card>
@@ -10,7 +10,7 @@
     <v-dialog v-model="dialog" width="500">
       <template v-slot:activator="{ on, attrs }">
         <v-btn color="red lighten-2" dark v-bind="attrs" v-on="on">
-          Click Me
+          Write post
         </v-btn>
       </template>
       <v-card>
@@ -26,7 +26,7 @@
         <v-divider></v-divider>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn class="mr-4" type="submit" @click="addTodo">
+          <v-btn class="mr-4" type="submit" @click="createBlog">
             Post
           </v-btn>
           <v-btn color="primary" text @click="dialog = false">
@@ -37,27 +37,30 @@
     </v-dialog>
     <br /><br />
     <div v-for="blog in blogs" :key="blog.id">
-      <span class="mr-5" @click="deleteBlog(blog.id)">&#10005;</span>
-      <span>{{ blog.createdAt.toDate() }}</span>
-      <p>{{ blog.title }}</p>
+      <span class="mr-5" @click="showDialog(blog.id)">&#10005;</span>
+      <nuxt-link :to="{ name: 'blog-me-blogId', params: { blogId: blog.id } }">
+        <span>{{ blog.createdAt.toDate() }}</span>
+        <p>{{ blog.title }}</p>
+      </nuxt-link>
     </div>
   </div>
+  <!-- <button :class="[$style.button, $style.buttonClose]">X</button> example -->
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 import firebase from "firebase";
 
 export default {
   layout: "basic",
   middleware: "auth",
-  components: {},
   computed: {
     ...mapState(["authUser"])
   },
   data() {
     return {
       dialog: false,
+      user: {},
       blogs: [],
       blog: {
         title: ""
@@ -65,14 +68,30 @@ export default {
     };
   },
   created() {
-    this.getBlogs();
+    this.getUser();
+    this.getUserBlogs();
   },
   methods: {
     async logout() {
       await this.$fire.auth.signOut();
-      this.$router.push("/login");
+      this.$router.push("/");
     },
-    addTodo() {
+    async getUser() {
+      const userRef = firebase
+        .firestore()
+        .collection("users")
+        .doc(firebase.auth().currentUser.uid);
+      const doc = await userRef.get();
+      this.user = doc.data();
+    },
+    async showDialog(id) {
+      const res = await this.$dialog.confirm({
+        text: "Do you want to delete this entry?",
+        title: "Warning"
+      });
+      if (true == res) this.deleteBlog(id);
+    },
+    createBlog() {
       firebase
         .firestore()
         .collection("users")
@@ -85,8 +104,8 @@ export default {
       this.dialog = false;
       this.blog.title = "";
     },
-    async getBlogs() {
-      var blogsRef = await firebase
+    async getUserBlogs() {
+      var blogsRef = firebase
         .firestore()
         .collection("users")
         .doc(firebase.auth().currentUser.uid)
