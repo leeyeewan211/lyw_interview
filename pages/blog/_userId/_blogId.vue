@@ -1,19 +1,36 @@
 <template>
-  <div class="text-center">
-    <v-card v-if="blog == null">
-      <p>Loading...</p>
-    </v-card>
-    <v-card v-if="blog != null">
-      <v-card-text>
-        <p>{{ blog.createdAt }}</p>
-        <p>{{ blog.title }}</p>
-      </v-card-text>
-    </v-card>
-  </div>
+  <v-app>
+    <v-main>
+      <v-container>
+        <v-card v-if="blog == null" class="elevation-0">
+            <v-list class="text-left">
+              <h4>Loading...</h4>
+            </v-list>
+        </v-card>
+        <div v-if="blog != null">
+          <v-card class="elevation-0">
+            <v-list class="text-left">
+              <h3>{{ blog.createdAt.toDate() | formatDate }}</h3>
+              <h4>{{ blog.title }}</h4>
+              <br />
+            </v-list>
+          </v-card>
+        </div>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
 import firebase from "firebase";
+import moment from "moment";
+import Vue from "vue";
+
+Vue.filter("formatDate", function(value) {
+  if (value) {
+    return moment(String(value)).format("DD MMMM YYYY, hh:mm a");
+  }
+});
 
 export default {
   layout: "basic",
@@ -42,3 +59,20 @@ export default {
   }
 };
 </script>
+
+<style>
+h2 {
+  font-weight: 500;
+}
+
+h3 {
+  color: black;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+h4 {
+  color: grey;
+  font-weight: 400;
+}
+</style>

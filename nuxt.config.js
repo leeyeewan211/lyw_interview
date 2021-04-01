@@ -52,24 +52,12 @@ export default {
               onAuthStateChangedAction: "onAuthStateChanged"
             },
             ssr: true
-            // watchLoggedIn: false
           }
         }
       }
     ],
     ["vuetify-dialog/nuxt", { property: "$dialog" }]
   ],
-
-  // not needed after all
-  // router: {
-  //   extendRoutes(routes, resolve) {
-  //     routes.push({
-  //       name: "blog-userId-blogId",
-  //       path: "/blog/:userId/:blogId",
-  //       component: resolve(__dirname, "pages/blog/_userId/_blogId.vue")
-  //     });
-  //   }
-  // },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {

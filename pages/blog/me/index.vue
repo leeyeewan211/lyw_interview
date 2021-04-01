@@ -1,55 +1,80 @@
 <template>
-  <div class="text-center">
-    <v-card>
-      <v-card-text>
-        <p>{{ user.name }}</p>
-        <v-btn @click="logout">Logout</v-btn>
-      </v-card-text>
-    </v-card>
-    <br /><br />
-    <v-dialog v-model="dialog" width="500">
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn color="red lighten-2" dark v-bind="attrs" v-on="on">
-          Write post
-        </v-btn>
-      </template>
-      <v-card>
-        <v-card-text>
-          <template>
-            <v-text-field
-              v-model="blog.title"
-              color="success"
-              required
-            ></v-text-field>
-          </template>
-        </v-card-text>
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn class="mr-4" type="submit" @click="createBlog">
-            Post
+  <v-container>
+    <div class="d-flex justify-end my-5">
+      <v-dialog v-model="dialog" width="500">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn class="blue" dark depressed v-bind="attrs" v-on="on">
+            Write post
           </v-btn>
-          <v-btn color="primary" text @click="dialog = false">
-            Close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <br /><br />
-    <div v-for="blog in blogs" :key="blog.id">
-      <span class="mr-5" @click="showDialog(blog.id)">&#10005;</span>
-      <nuxt-link :to="{ name: 'blog-me-blogId', params: { blogId: blog.id } }">
-        <span>{{ blog.createdAt.toDate() }}</span>
-        <p>{{ blog.title }}</p>
-      </nuxt-link>
+        </template>
+        <v-card>
+          <v-card-text>
+            <template>
+              <v-toolbar class="elevation-0 mb-5"
+                ><h2 class="pt-3">New blog entry</h2></v-toolbar
+              >
+              <v-text-field
+                v-model="blog.title"
+                class="px-4"
+                required
+              ></v-text-field>
+            </template>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions class="py-3">
+            <v-spacer></v-spacer>
+            <v-btn
+              class="mr-4 blue"
+              dark
+              depressed
+              type="submit"
+              @click="createBlog"
+            >
+              Post
+            </v-btn>
+            <v-btn @click="dialog = false">
+              Close
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </div>
-  </div>
-  <!-- <button :class="[$style.button, $style.buttonClose]">X</button> example -->
+    <br />
+    <v-list v-for="blog in blogs" :key="blog.id">
+      <div class="d-flex">
+        <div class="mr-auto">
+          <nuxt-link
+            :to="{ name: 'blog-me-blogId', params: { blogId: blog.id } }"
+          >
+            <h3>{{ blog.createdAt.toDate() | formatDate }}</h3>
+            <h4>{{ blog.title }}</h4>
+            <br />
+          </nuxt-link>
+        </div>
+        <div>
+          <span
+            class="mr-5 red--text font-weight-bold"
+            @click="showDialog(blog.id)"
+            style="cursor: pointer"
+            >&#10005;</span
+          >
+        </div>
+      </div>
+    </v-list>
+  </v-container>
 </template>
 
 <script>
 import { mapState } from "vuex";
 import firebase from "firebase";
+import moment from "moment";
+import Vue from "vue";
+
+Vue.filter("formatDate", function(value) {
+  if (value) {
+    return moment(String(value)).format("DD MMMM YYYY, hh:mma");
+  }
+});
 
 export default {
   layout: "basic",
@@ -87,7 +112,7 @@ export default {
     async showDialog(id) {
       const res = await this.$dialog.confirm({
         text: "Do you want to delete this entry?",
-        title: "Warning"
+        title: "Delete entry"
       });
       if (true == res) this.deleteBlog(id);
     },
@@ -109,7 +134,8 @@ export default {
         .firestore()
         .collection("users")
         .doc(firebase.auth().currentUser.uid)
-        .collection("blogs");
+        .collection("blogs")
+        .orderBy("createdAt", "desc");
       blogsRef.onSnapshot(snap => {
         this.blogs = [];
         snap.forEach(doc => {

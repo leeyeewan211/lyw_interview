@@ -1,30 +1,32 @@
 <template>
-  <v-row class="justify-content-end">
-    <v-col>
-      <v-btn
-        v-if="null == authUser"
-        @click="signInWithGoogle"
-        color="primary"
-        class="ma-2"
-        >Login</v-btn
-      >
-      <nuxt-link v-else :to="{ name: 'blog-me' }">
-        <v-btn>View Profile</v-btn>
-      </nuxt-link>
-      <br /><br />
-      <div v-for="user in users" :key="user.id">
-        <nuxt-link :to="{ name: 'blog-userId', params: { userId: user.id } }">{{
-          user.name
-        }}</nuxt-link>
-      </div>
-    </v-col>
-    <div></div>
-  </v-row>
+  <v-app>
+    <v-main>
+      <v-container>
+        <v-card class="elevation-0">
+          <v-list v-for="user in users" :key="user.id">
+            <div class="d-flex">
+              <div class="mr-auto">
+                <h3>{{ user.name }}</h3>
+              </div>
+              <div class="mb-5">
+                <nuxt-link
+                  :to="{ name: 'blog-userId', params: { userId: user.id } }"
+                >
+                  <v-btn class="blue" dark depressed>View Blogs</v-btn>
+                  <br />
+                </nuxt-link>
+              </div>
+            </div>
+          </v-list>
+        </v-card>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import firebase from "firebase";
 import { mapState } from "vuex";
+import firebase from "firebase";
 
 const createProfile = async authUser => {
   try {
@@ -51,7 +53,6 @@ export default {
       user: {}
     };
   },
-
   created() {
     this.getUsers();
   },
@@ -76,3 +77,15 @@ export default {
   }
 };
 </script>
+
+<style>
+.v-application a {
+  text-decoration: none;
+}
+
+h3 {
+  color: black;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+</style>
